@@ -62,7 +62,7 @@ public class Example1ScanningActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_scan)
     public void onStartScanClick() {
-        bluetoothAdapter.startLeScan(leScanCallback); // <---------
+        final boolean startLeScan = bluetoothAdapter.startLeScan(leScanCallback);// <---------
         isScanning = true;
         updateViews();
     }

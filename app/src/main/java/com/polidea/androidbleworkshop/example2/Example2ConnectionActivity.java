@@ -4,9 +4,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +26,10 @@ public class Example2ConnectionActivity extends AppCompatActivity {
         DISCONNECTED, DISCONNECTING, CONNECTED, CONNECTING
     }
 
+    @Bind(R.id.connect)
+    Button connectButton;
+    @Bind(R.id.disconnect)
+    Button disconnectButton;
     @Bind(R.id.address)
     EditText addressView;
     @Bind(R.id.connection_state)
@@ -47,6 +54,7 @@ public class Example2ConnectionActivity extends AppCompatActivity {
             }
         }
     };
+    private BluetoothManager bluetoothManager;
 
     @OnClick(R.id.connect)
     public void onConnectClick() {
@@ -64,13 +72,23 @@ public class Example2ConnectionActivity extends AppCompatActivity {
         setContentView(R.layout.acticity_example2);
         ButterKnife.bind(this);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
     }
 
     @OnClick(R.id.disconnect)
     public void onDisconnectClick() {
         // 1. Request connection to be dropped first.
         updateConnectionState(ConnectionState.DISCONNECTING);
-        bluetoothGatt.disconnect();
+        final int connectionState = bluetoothManager.getConnectionState(bluetoothGatt.getDevice(), BluetoothProfile.GATT);
+
+        if (connectionState == BluetoothProfile.STATE_CONNECTED
+                || connectionState == BluetoothProfile.STATE_CONNECTING) {
+            bluetoothGatt.disconnect();
+        } else if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
+            updateConnectionState(ConnectionState.DISCONNECTED);
+            bluetoothGatt.close();
+            bluetoothGatt = null;
+        }
     }
 
     private String getEnteredMacAddress() {
@@ -79,10 +97,12 @@ public class Example2ConnectionActivity extends AppCompatActivity {
 
     private void updateConnectionState(ConnectionState connectionState) {
         this.connectionState = connectionState;
-        runOnUiThread(() -> updateUI());
+        runOnUiThread(this::updateUI);
     }
 
     private void updateUI() {
         connectionStateView.setText(connectionState.name());
+        connectButton.setEnabled(connectionState == ConnectionState.DISCONNECTED);
+        disconnectButton.setEnabled(connectionState == ConnectionState.CONNECTED);
     }
 }

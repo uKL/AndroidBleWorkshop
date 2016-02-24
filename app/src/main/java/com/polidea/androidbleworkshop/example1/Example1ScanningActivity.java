@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.polidea.androidbleworkshop.R;
+import com.polidea.androidbleworkshop.toolbox.UUIDParser;
 
+import java.util.List;
 import java.util.UUID;
 
 import butterknife.Bind;
@@ -19,6 +21,7 @@ import butterknife.OnClick;
 
 public class Example1ScanningActivity extends AppCompatActivity {
 
+    public static final UUID EXPECTED_UUID = UUID.fromString("D0611E78-BBB4-4591-A5F8-487910AE4366");
     @Bind(R.id.start_scan)
     Button startScanButton;
     @Bind(R.id.stop_scan)
@@ -28,11 +31,16 @@ public class Example1ScanningActivity extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter;
     private boolean isScanning = false;
     private ArrayAdapter<String> resultAdapter;
+    private UUIDParser uuidParser = new UUIDParser();
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            Log.i(getClass().getSimpleName(), "Found device: " + device.getAddress());
-            resultAdapter.add(String.format("%s:%s", device.getAddress(), device.getName())); // <-- Get name requires BLUETOOTH permission
+            final List<UUID> uuids = uuidParser.extractUUIDs(scanRecord);
+
+            if (uuids.contains(EXPECTED_UUID)) {
+                Log.i(getClass().getSimpleName(), "Found device: " + device.getAddress());
+                resultAdapter.add(String.format("%s:%s", device.getAddress(), device.getName())); // <-- Get name requires BLUETOOTH permission
+            }
         }
     };
 
@@ -54,7 +62,7 @@ public class Example1ScanningActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_scan)
     public void onStartScanClick() {
-        bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("D0611E78-BBB4-4591-A5F8-487910AE4366")}, leScanCallback); // <---------
+        bluetoothAdapter.startLeScan(leScanCallback); // <---------
         isScanning = true;
         updateViews();
     }

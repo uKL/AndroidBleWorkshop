@@ -11,6 +11,8 @@ import android.widget.ListView;
 
 import com.polidea.androidbleworkshop.R;
 
+import java.util.UUID;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -52,7 +54,7 @@ public class Example1ScanningActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_scan)
     public void onStartScanClick() {
-        bluetoothAdapter.startLeScan(leScanCallback); // <---------
+        bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("D0611E78-BBB4-4591-A5F8-487910AE4366")}, leScanCallback); // <---------
         isScanning = true;
         updateViews();
     }

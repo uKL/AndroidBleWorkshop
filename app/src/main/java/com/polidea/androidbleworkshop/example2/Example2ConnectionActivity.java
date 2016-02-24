@@ -51,6 +51,8 @@ public class Example2ConnectionActivity extends AppCompatActivity {
                     bluetoothGatt.close();
                     bluetoothGatt = null;
                 }
+            } else {
+                onDisconnectRequested();
             }
         }
     };
@@ -76,7 +78,7 @@ public class Example2ConnectionActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.disconnect)
-    public void onDisconnectClick() {
+    public void onDisconnectRequested() {
         // 1. Request connection to be dropped first.
         updateConnectionState(ConnectionState.DISCONNECTING);
         final int connectionState = bluetoothManager.getConnectionState(bluetoothGatt.getDevice(), BluetoothProfile.GATT);

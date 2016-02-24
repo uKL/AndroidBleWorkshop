@@ -1,12 +1,25 @@
 package com.polidea.androidbleworkshop;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+import com.polidea.androidbleworkshop.example1.Example1ScanningActivity;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
+    @OnClick(R.id.example_1)
+    public void launchExample1() {
+        startActivity(new Intent(this, Example1ScanningActivity.class));
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
     }
 }

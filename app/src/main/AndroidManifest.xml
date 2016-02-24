@@ -3,8 +3,12 @@
     package="com.polidea.androidbleworkshop"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Required to read some scan result fields like name -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
     <!-- Required for service discovery -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- Coarse or fine location is required in order to receive scan results -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:allowBackup="true"

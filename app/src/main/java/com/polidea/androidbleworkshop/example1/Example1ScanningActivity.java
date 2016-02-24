@@ -30,7 +30,7 @@ public class Example1ScanningActivity extends AppCompatActivity {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.i(getClass().getSimpleName(), "Found device: " + device.getAddress());
-//            resultAdapter.add(String.format("%s:%s", device.getAddress(), device.getName()));
+            resultAdapter.add(String.format("%s:%s", device.getAddress(), device.getName())); // <-- Get name requires BLUETOOTH permission
         }
     };
 

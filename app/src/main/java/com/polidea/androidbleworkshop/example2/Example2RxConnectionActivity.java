@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.polidea.androidbleworkshop.R;
 import com.polidea.rxandroidble.RxBleClientImpl;
+import com.polidea.rxandroidble.RxBleConnection.RxBleConnectionState;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
@@ -14,13 +15,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class Example2RxConnectionActivity extends RxAppCompatActivity {
-
-    enum ConnectionState {
-        DISCONNECTED, DISCONNECTING, CONNECTED, CONNECTING
-    }
 
     @Bind(R.id.connect)
     Button connectButton;
@@ -30,7 +28,7 @@ public class Example2RxConnectionActivity extends RxAppCompatActivity {
     EditText addressView;
     @Bind(R.id.connection_state)
     TextView connectionStateView;
-    private ConnectionState connectionState = ConnectionState.DISCONNECTED;
+    private RxBleConnectionState connectionState = RxBleConnectionState.DISCONNECTED;
     private RxBleClientImpl rxBleClient;
     private Subscription connectionSubscription;
 
@@ -40,10 +38,17 @@ public class Example2RxConnectionActivity extends RxAppCompatActivity {
          * Must be a valid MAC address or expect java.lang.IllegalArgumentException
          */
         final RxBleDevice bleDevice = rxBleClient.getBleDevice(getEnteredMacAddress());
+        bleDevice.getConnectionState()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateConnectionState);
+
         connectionSubscription = bleDevice
                 .establishConnection(this, false)
                 .subscribeOn(Schedulers.io())
-                .subscribe(rxBleConnection -> {}, throwable -> {});
+                .subscribe(rxBleConnection -> {
+                }, throwable -> {
+                });
     }
 
     @Override
@@ -63,14 +68,14 @@ public class Example2RxConnectionActivity extends RxAppCompatActivity {
         return addressView.getText().toString();
     }
 
-    private void updateConnectionState(ConnectionState connectionState) {
+    private void updateConnectionState(RxBleConnectionState connectionState) {
         this.connectionState = connectionState;
         runOnUiThread(this::updateUI);
     }
 
     private void updateUI() {
-        connectionStateView.setText(connectionState.name());
-        connectButton.setEnabled(connectionState == ConnectionState.DISCONNECTED);
-        disconnectButton.setEnabled(connectionState == ConnectionState.CONNECTED);
+        connectionStateView.setText(connectionState.toString());
+        connectButton.setEnabled(connectionState == RxBleConnectionState.DISCONNECTED);
+        disconnectButton.setEnabled(connectionState == RxBleConnectionState.CONNECTED);
     }
 }

@@ -5,7 +5,9 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 
 import com.polidea.androidbleworkshop.R;
 
@@ -19,23 +21,26 @@ public class Example1ScanningActivity extends AppCompatActivity {
     Button startScanButton;
     @Bind(R.id.stop_scan)
     Button stopScanButton;
+    @Bind(R.id.scan_results)
+    ListView scanResults;
+    private BluetoothAdapter bluetoothAdapter;
+    private boolean isScanning = false;
+    private ArrayAdapter<String> resultAdapter;
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            /**
-             * Process scan results.
-             */
             Log.i(getClass().getSimpleName(), "Found device: " + device.getAddress());
+//            resultAdapter.add(String.format("%s:%s", device.getAddress(), device.getName()));
         }
     };
-    private BluetoothAdapter bluetoothAdapter;
-    private boolean isScanning = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acticity_example1);
         ButterKnife.bind(this);
+        resultAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        scanResults.setAdapter(resultAdapter);
         /**
          * Currently Android only supports one Bluetooth adapter, but the API could be extended to support more.
          */
@@ -47,16 +52,22 @@ public class Example1ScanningActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_scan)
     public void onStartScanClick() {
-        bluetoothAdapter.startLeScan(leScanCallback);
+        bluetoothAdapter.startLeScan(leScanCallback); // <---------
         isScanning = true;
         updateViews();
     }
 
     @OnClick(R.id.stop_scan)
     public void onStopScanClick() {
-        bluetoothAdapter.stopLeScan(leScanCallback);
+        bluetoothAdapter.stopLeScan(leScanCallback); // <---------
         isScanning = false;
         updateViews();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        onStopScanClick();
     }
 
     private void updateViews() {

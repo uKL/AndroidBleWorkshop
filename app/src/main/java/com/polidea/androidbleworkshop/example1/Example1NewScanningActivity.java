@@ -3,12 +3,15 @@ package com.polidea.androidbleworkshop.example1;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.polidea.androidbleworkshop.R;
 
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -77,7 +80,10 @@ public class Example1NewScanningActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_scan)
     public void onStartScanClick() {
-        bluetoothLeScanner.startScan(leScanCallback);
+        final ScanFilter.Builder scanFilter = new ScanFilter.Builder();
+        final ScanSettings.Builder scanSettings = new ScanSettings.Builder();
+//        scanSettings.setScanMode()
+        bluetoothLeScanner.startScan(Collections.<ScanFilter>emptyList(), scanSettings.build(), leScanCallback);
     }
 
     @OnClick(R.id.stop_scan)

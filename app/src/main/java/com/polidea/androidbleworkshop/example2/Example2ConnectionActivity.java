@@ -29,18 +29,24 @@ public class Example2ConnectionActivity extends AppCompatActivity {
     TextView connectionStateView;
     private BluetoothAdapter bluetoothAdapter;
     private ConnectionState connectionState = ConnectionState.DISCONNECTED;
+    private BluetoothGatt bluetoothGatt;
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
 
-            if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
-                updateConnectionState(ConnectionState.CONNECTED);
-                runOnUiThread(() -> Toast.makeText(Example2ConnectionActivity.this, "Connected!", Toast.LENGTH_LONG).show());
-                // Hooray!
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    updateConnectionState(ConnectionState.CONNECTED);
+                    runOnUiThread(() -> Toast.makeText(Example2ConnectionActivity.this, "Connected!", Toast.LENGTH_LONG).show());
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    updateConnectionState(ConnectionState.DISCONNECTED);
+                    // 2. Close GATT client
+                    bluetoothGatt.close();
+                    bluetoothGatt = null;
+                }
             }
         }
     };
-    private BluetoothGatt bluetoothGatt;
 
     @OnClick(R.id.connect)
     public void onConnectClick() {
@@ -58,6 +64,13 @@ public class Example2ConnectionActivity extends AppCompatActivity {
         setContentView(R.layout.acticity_example2);
         ButterKnife.bind(this);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    }
+
+    @OnClick(R.id.disconnect)
+    public void onDisconnectClick() {
+        // 1. Request connection to be dropped first.
+        updateConnectionState(ConnectionState.DISCONNECTING);
+        bluetoothGatt.disconnect();
     }
 
     private String getEnteredMacAddress() {

@@ -21,4 +21,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Launch Example 2 Rx"/>
+
+    <Button
+        android:id="@+id/example_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Launch Example 3"/>
+
 </LinearLayout>

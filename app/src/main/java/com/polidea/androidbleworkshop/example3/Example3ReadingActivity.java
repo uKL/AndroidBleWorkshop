@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -16,6 +18,8 @@ import android.widget.Toast;
 
 import com.polidea.androidbleworkshop.R;
 
+import java.util.UUID;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -26,6 +30,9 @@ public class Example3ReadingActivity extends AppCompatActivity {
         DISCONNECTED, DISCONNECTING, CONNECTED, CONNECTING
     }
 
+    public static final String DEVICE_INFORMATION = "0000180A-0000-1000-8000-00805f9b34fb";
+    public static final String VENDOR_INFORMATION = "00002A29-0000-1000-8000-00805f9b34fb";
+
     @Bind(R.id.connect)
     Button connectButton;
     @Bind(R.id.disconnect)
@@ -34,9 +41,12 @@ public class Example3ReadingActivity extends AppCompatActivity {
     EditText addressView;
     @Bind(R.id.connection_state)
     TextView connectionStateView;
+    @Bind(R.id.characteristic_value)
+    TextView characteristicValue;
     private BluetoothAdapter bluetoothAdapter;
     private ConnectionState connectionState = ConnectionState.DISCONNECTED;
     private BluetoothGatt bluetoothGatt;
+    private BluetoothManager bluetoothManager;
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -45,6 +55,7 @@ public class Example3ReadingActivity extends AppCompatActivity {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     updateConnectionState(ConnectionState.CONNECTED);
                     runOnUiThread(() -> Toast.makeText(Example3ReadingActivity.this, "Connected!", Toast.LENGTH_LONG).show());
+                    readCharacteristic();
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     updateConnectionState(ConnectionState.DISCONNECTED);
                     // 2. Close GATT client
@@ -55,8 +66,39 @@ public class Example3ReadingActivity extends AppCompatActivity {
                 onDisconnectRequested();
             }
         }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                final BluetoothGattService service = gatt.getService(UUID.fromString(DEVICE_INFORMATION));
+                final BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(VENDOR_INFORMATION));
+                final boolean startedReadOperation = gatt.readCharacteristic(characteristic);
+
+                if (!startedReadOperation) {
+                    onDisconnectRequested();
+                }
+            } else {
+                onDisconnectRequested();
+            }
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                final byte[] characteristicValue = characteristic.getValue();
+                onCharacteristicValue(characteristicValue);
+            } else {
+                onDisconnectRequested();
+            }
+        }
     };
-    private BluetoothManager bluetoothManager;
+
+    private void onCharacteristicValue(byte[] characteristic) {
+        final String vendor = new String(characteristic);
+        runOnUiThread(() -> characteristicValue.setText(vendor));
+    }
 
     @OnClick(R.id.connect)
     public void onConnectClick() {
@@ -71,7 +113,7 @@ public class Example3ReadingActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.acticity_example2);
+        setContentView(R.layout.acticity_example3);
         ButterKnife.bind(this);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -95,6 +137,11 @@ public class Example3ReadingActivity extends AppCompatActivity {
 
     private String getEnteredMacAddress() {
         return addressView.getText().toString();
+    }
+
+    private void readCharacteristic() {
+        // 1. Discover services
+        final boolean startedDiscovering = bluetoothGatt.discoverServices();
     }
 
     private void updateConnectionState(ConnectionState connectionState) {

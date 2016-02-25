@@ -26,6 +26,7 @@
         <activity android:name=".example1.Example1ScanningActivity"/>
         <activity android:name=".example1.Example1NewScanningActivity"/>
         <activity android:name=".example2.Example2ConnectionActivity"/>
+        <activity android:name=".example2.Example2RxConnectionActivity"/>
     </application>
 
 </manifest>

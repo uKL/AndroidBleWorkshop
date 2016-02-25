@@ -15,7 +15,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class Example2RxConnectionActivity extends RxAppCompatActivity {
@@ -38,16 +37,17 @@ public class Example2RxConnectionActivity extends RxAppCompatActivity {
          * Must be a valid MAC address or expect java.lang.IllegalArgumentException
          */
         final RxBleDevice bleDevice = rxBleClient.getBleDevice(getEnteredMacAddress());
-        bleDevice.getConnectionState()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateConnectionState);
 
+        updateConnectionState(RxBleConnectionState.CONNECTING);
         connectionSubscription = bleDevice
                 .establishConnection(this, false)
                 .subscribeOn(Schedulers.io())
+                .doOnUnsubscribe(() -> updateConnectionState(RxBleConnectionState.DISCONNECTED))
                 .subscribe(rxBleConnection -> {
+                    updateConnectionState(RxBleConnectionState.CONNECTED);
+                    // Connection established
                 }, throwable -> {
+                    // Connection broken
                 });
     }
 
@@ -67,6 +67,7 @@ public class Example2RxConnectionActivity extends RxAppCompatActivity {
     private String getEnteredMacAddress() {
         return addressView.getText().toString();
     }
+
 
     private void updateConnectionState(RxBleConnectionState connectionState) {
         this.connectionState = connectionState;

@@ -8,6 +8,7 @@
     <EditText
         android:id="@+id/address"
         android:layout_width="match_parent"
+        android:text="34:B1:F7:D5:04:01"
         android:layout_height="wrap_content"/>
 
     <Button

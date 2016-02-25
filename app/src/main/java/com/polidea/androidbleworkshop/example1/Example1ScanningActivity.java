@@ -21,7 +21,7 @@ import butterknife.OnClick;
 
 public class Example1ScanningActivity extends AppCompatActivity {
 
-    public static final UUID EXPECTED_UUID = UUID.fromString("D0611E78-BBB4-4591-A5F8-487910AE4366");
+    public static final UUID EXPECTED_UUID = UUID.fromString("4E99FFF0-4B3E-11E5-9D65-0002A5D5C51B");
     @Bind(R.id.start_scan)
     Button startScanButton;
     @Bind(R.id.stop_scan)
